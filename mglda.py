@@ -229,12 +229,14 @@ class MGLDA:
         """get topic-word distribution"""
         return (self.n_gl_z_w + 1) / (self.n_gl_z[:, numpy.newaxis] + 1), (self.n_loc_z_w + 1) / (self.n_loc_z[:, numpy.newaxis] + 1)
 
+
 def mglda_learning(mglda, iteration, voca):
     for i in range(iteration):
         print "\n\n\n==== " + str(i) + "-th inference ===="
         mglda.inference()
         print "inference complete"
         output_word_topic_dist(mglda, voca)
+
 
 def output_word_topic_dist(mglda, voca):
     z_gl_count = numpy.zeros(mglda.K_gl, dtype=int)
@@ -245,7 +247,6 @@ def output_word_topic_dist(mglda, voca):
     for m, doc in enumerate(mglda.docs):
         for s, sent in enumerate(doc):
             for i, word in enumerate(sent):
-#                v = mglda.v_d_s_n[m][s][i] # 0--T
                 r = mglda.r_d_s_n[m][s][i]
                 z = mglda.z_d_s_n[m][s][i]
                 if r == "gl":
@@ -278,21 +279,25 @@ def output_word_topic_dist(mglda, voca):
         for w in numpy.argsort(-phi_loc[k])[:20]:
             print "%s: %f (%d)" % (voca[w], phi_loc[k,w], word_loc_count[k].get(w,0))
 
+
 def test():
-#    import nltk.corpus
     import vocabulary_for_mglda as vocabulary
     
-    corpus = vocabulary.load_corpus_each_sentence("0:2000")
+    corpus = vocabulary.load_file('/Users/ashish/Downloads/ap/wapo.txt')
 
-    #docs[sentence_idx][word_idx]
     voca = vocabulary.Vocabulary(True)
     docs = [voca.doc_to_ids_each_sentence(doc) for doc in corpus]
-    K_gl, K_loc, gamma, alpha_gl, alpha_loc, alpha_mix_gl, alpha_mix_loc, beta_gl, beta_loc, T, docs, W = 50, 10, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 3, docs, voca.size()
+    K_gl, K_loc, gamma, alpha_gl, alpha_loc, alpha_mix_gl, alpha_mix_loc, beta_gl, beta_loc, T, docs, \
+    W = 50, 10, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 3, docs, voca.size()
     mglda = MGLDA(K_gl, K_loc, gamma, alpha_gl, alpha_loc, alpha_mix_gl, alpha_mix_loc, beta_gl, beta_loc, T, docs, W)
-    print "corpus=%d, words=%d, K_gl=%d, K_loc=%d, gamma=%f, alpha_gl=%f, alpha_loc=%f, alpha_mix_gl=%f, alpha_mix_loc=%f, beta_gl=%f, beta_loc=%f" % (len(corpus), len(voca.vocas), K_gl, K_loc, gamma, alpha_gl, alpha_loc, alpha_mix_gl, alpha_mix_loc, beta_gl, beta_loc)
+    print "corpus=%d, words=%d, K_gl=%d, K_loc=%d, gamma=%f, alpha_gl=%f, alpha_loc=%f, alpha_mix_gl=%f, " \
+          "alpha_mix_loc=%f, beta_gl=%f, beta_loc=%f" % (len(corpus), len(voca.vocas), K_gl, K_loc, gamma,
+                                                         alpha_gl, alpha_loc, alpha_mix_gl, alpha_mix_loc,
+                                                         beta_gl, beta_loc)
     
-    iteration = 1000
+    iteration = 10
     mglda_learning(mglda, iteration, voca)
+
 
 if __name__ == "__main__":
     test()
